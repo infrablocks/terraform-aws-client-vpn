@@ -1,14 +1,14 @@
-Terraform AWS Elasticache Redis
+Terraform AWS Client VPN
 ===============================
 
-[![CircleCI](https://circleci.com/gh/infrablocks/terraform-aws-elasticache-redis.svg?style=svg)](https://circleci.com/gh/infrablocks/terraform-aws-elasticache-redis)
+[![CircleCI](https://circleci.com/gh/infrablocks/terraform-aws-client-vpn.svg?style=svg)](https://circleci.com/gh/infrablocks/terraform-aws-client-vpn)
 
-A Terraform module for deploying an Elasticache Redis instance / cluster in AWS.
+A Terraform module for deploying a client VPN in AWS.
 
-The Elasticache Redis deployment requires:
+The client VPN deployment requires:
 * An existing VPC
  
-The Elasticache Redis deployment consists of:
+The client VPN deployment consists of:
 * 
 
 ![Diagram of infrastructure managed by this module](https://raw.githubusercontent.com/infrablocks/terraform-aws-elasticache-redis/master/docs/architecture.png)
@@ -20,8 +20,8 @@ To use the module, include something like the following in your terraform
 configuration:
 
 ```hcl-terraform
-module "ecs_cluster" {
-  source = "infrablocks/elasticache-redis/aws"
+module "client_vpn" {
+  source = "infrablocks/client-vpn/aws"
   version = "0.1.1"
   
   region = "eu-west-2"
@@ -32,9 +32,9 @@ module "ecs_cluster" {
 }
 ```
 
-As mentioned above, Redis deploys into an existing base network. Whilst these 
-can be created using any mechanism you like, the following modules may be of 
-use: 
+As mentioned above, the client VPN deploys into an existing base network. Whilst 
+these can be created using any mechanism you like, the following modules may be 
+of use: 
 * [AWS Base Networking](https://github.com/tobyclemson/terraform-aws-base-networking)
 
 ### Inputs
@@ -56,15 +56,16 @@ Development
 
 ### Machine Requirements
 
-In order for the build to run correctly, a few tools will need to be installed on your
-development machine:
+In order for the build to run correctly, a few tools will need to be installed 
+on your development machine:
 
-* Ruby (2.3.1)
+* Ruby (2.4.7)
 * Bundler
 * git
 * git-crypt
 * gnupg
 * direnv
+* aws-vault
 
 #### Mac OS X Setup
 
@@ -95,6 +96,9 @@ brew install git
 brew install git-crypt
 brew install gnupg
 
+# aws-vault
+brew cask install
+
 # direnv
 brew install direnv
 echo "$(direnv hook bash)" >> ~/.bash_profile
@@ -106,35 +110,58 @@ direnv allow <repository-directory>
 
 ### Running the build
 
-To provision module infrastructure, run tests and then destroy that infrastructure,
-execute:
+Running the build requires an AWS account and AWS credentials. You are free to 
+configure credentials however you like as long as an access key ID and secret
+access key are available. These instructions utilise 
+[aws-vault](https://github.com/99designs/aws-vault) which makes credential
+management easy and secure.
+
+To provision module infrastructure, run tests and then destroy that 
+infrastructure, execute:
 
 ```bash
-./go
+aws-vault exec <profile> -- ./go
 ```
 
 To provision the module prerequisites:
 
 ```bash
-./go deployment:prerequisites:provision[<deployment_identifier>]
+aws-vault exec <profile> -- ./go deployment:prerequisites:provision[<deployment_identifier>]
 ```
 
 To provision the module contents:
 
 ```bash
-./go deployment:harness:provision[<deployment_identifier>]
+aws-vault exec <profile> -- ./go deployment:harness:provision[<deployment_identifier>]
 ```
 
 To destroy the module contents:
 
 ```bash
-./go deployment:harness:destroy[<deployment_identifier>]
+aws-vault exec <profile> -- ./go deployment:harness:destroy[<deployment_identifier>]
 ```
 
 To destroy the module prerequisites:
 
 ```bash
-./go deployment:prerequisites:destroy[<deployment_identifier>]
+aws-vault exec <profile> -- ./go deployment:prerequisites:destroy[<deployment_identifier>]
+```
+
+Configuration parameters can be overridden via environment variables:
+
+```bash
+DEPLOYMENT_IDENTIFIER=testing aws-vault exec <profile> -- ./go
+```
+
+When a deployment identifier is provided via an environment variable, 
+infrastructure will not be destroyed at the end of test execution. This can
+be useful during development to avoid lengthy provision and destroy cycles.
+
+By default, providers will be downloaded for each terraform execution. To
+cache providers between calls:
+
+```bash
+TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache" aws-vault exec <profile> -- ./go
 ```
 
 ### Common Tasks
@@ -144,7 +171,7 @@ To destroy the module prerequisites:
 To generate an SSH key pair:
 
 ```
-ssh-keygen -t rsa -b 4096 -C integration-test@example.com -N '' -f config/secrets/keys/bastion/ssh
+ssh-keygen -m PEM -t rsa -b 4096 -C integration-test@example.com -N '' -f config/secrets/keys/bastion/ssh
 ```
 
 #### Generating a self-signed certificate
@@ -187,7 +214,7 @@ Contributing
 ------------
 
 Bug reports and pull requests are welcome on GitHub at 
-https://github.com/infrablocks/terraform-aws-elasticache-redis. 
+https://github.com/infrablocks/terraform-aws-client-vpn. 
 This project is intended to be a safe, welcoming space for collaboration, and 
 contributors are expected to adhere to 
 the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
