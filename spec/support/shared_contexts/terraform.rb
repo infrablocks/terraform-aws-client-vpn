@@ -1,5 +1,7 @@
-require 'aws-sdk'
+# frozen_string_literal: true
+
 require 'awspec'
+require 'ostruct'
 
 require_relative '../terraform_module'
 
@@ -8,7 +10,13 @@ shared_context :terraform do
 
   let(:cloudwatch_logs_client) { Aws::CloudWatchLogs::Client.new }
 
-  let(:vars) {TerraformModule.configuration.for(:harness).vars}
+  let(:vars) do
+    OpenStruct.new(
+      TerraformModule.configuration
+      .for(:harness)
+      .vars
+    )
+  end
 
   def output_for(role, name)
     TerraformModule.output_for(role, name)
@@ -16,7 +24,8 @@ shared_context :terraform do
 
   def reprovision(overrides = nil)
     TerraformModule.provision_for(
-        :harness,
-        TerraformModule.configuration.for(:harness, overrides).vars)
+      :harness,
+      TerraformModule.configuration.for(:harness, overrides).vars
+    )
   end
 end
