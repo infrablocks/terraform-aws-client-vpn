@@ -35,7 +35,7 @@ module "client_vpn" {
 As mentioned above, the client VPN deploys into an existing base network. Whilst 
 these can be created using any mechanism you like, the following modules may be 
 of use: 
-* [AWS Base Networking](https://github.com/tobyclemson/terraform-aws-base-networking)
+* [AWS Base Networking](https://github.com/infrablocks/terraform-aws-base-networking)
 
 ### Inputs
 
