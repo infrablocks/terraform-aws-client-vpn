@@ -11,7 +11,7 @@ The client VPN deployment requires:
 The client VPN deployment consists of:
 * 
 
-![Diagram of infrastructure managed by this module](https://raw.githubusercontent.com/infrablocks/terraform-aws-elasticache-redis/master/docs/architecture.png)
+![Diagram of infrastructure managed by this module](https://raw.githubusercontent.com/infrablocks/terraform-aws-elasticache-redis/main/docs/architecture.png)
 
 Usage
 -----
